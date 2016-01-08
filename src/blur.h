@@ -5,6 +5,10 @@
 
 /** 2d convolution filter
  *
+ * Pixeldata is in the stb_image.h format; i.e. *y scanlines of *x pixels,
+ * with each pixel consisting of N interleaved 8-bit components; the first
+ * pixel pointed to is top-left-most in the image.
+ *
  * @param width         Width in pixels of /p data
  * @param height        Height in pixels of /p data
  * @param components    Number of components of each pixel; i.e. RGB = 3
@@ -13,30 +17,25 @@
  * @param kernel        Matrix which to apply to pixel data
  * @param kernelSize    Width and height of kernel
  * @param mask          Multiply the effect
- *
- * Pixeldata is in the stb_image.h format; i.e. *y scanlines of *x pixels,
- * with each pixel consisting of N interleaved 8-bit components; the first
- * pixel pointed to is top-left-most in the image.
- *
- * Returns true if successful, false otherwise
+ * @returns             true if successful
  *
  * Reference:
  *  - http://setosa.io/ev/image-kernels/
  *  - https://docs.gimp.org/en/plug-in-convmatrix.html
- *
+ *  - http://www.pixelstech.net/article/1353768112-Gaussian-Blur-Algorithm
+ *  - http://www.imagemagick.org/Usage/convolve/
  */
 bool convolve(const int width,        // width of image
               const int height,       // height of image
-              const int minWidth,         //
-              const int minHeight,         //
-              const int maxWidth,     // maximum width from which to sample the kernel
-              const int maxHeight,    // maximum height ..
+              const int minX,         //
+              const int minY,         //
+              const int maxX,         // maximum width from which to sample the kernel
+              const int maxY,         // maximum height ..
               const int components,   // number of components/channels
               const uint8_t *in,      // pointer to the start of incoming image
               uint8_t *out,           // pointer to the start of outgoing image
               const double *kernel,   // kernel used for convolution
-              const int kernelSize,   // size of (square) kernel
-              const double *mask);    // multiply the effect
+              const int kernelSize);  // size of (square) kernel
 
 
 /** Trim image
@@ -100,7 +99,9 @@ double computeGaussian(const double x,
  * @param normalised  whether or not to normalise the array
  *
  */
-int computeKernel(double *out, const int W, const bool normalised);
+double computeKernel(double *out,
+                     const int W,
+                     const double sigma);
 
 
 int computeIdentityKernel(double *out, const int W);
@@ -164,3 +165,14 @@ int fit(double *in,
         const double oldMax,  // e.g. 1
         const double newMin,  // e.g. 0
         const double newMax); // e.g. 255
+
+
+int normalise(double *out,
+              const double sum,
+              const int width,
+              const int height);
+
+
+double computeSum(const double *in,
+                  const int width,
+                  const int height);

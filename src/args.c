@@ -1,20 +1,33 @@
 #define _XOPEN_SOURCE
+#define _XOPEN_SOURCE_EXTENDED
 
-#include <stdio.h>
+#include <limits.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
 #include <strings.h>
-#include <unistd.h>
+#include <string.h>
+#include <libgen.h>
+#include <stdio.h>
 
 #include "args.h"
 
 
-bool parseArgs(int argc, char **argv, char **filenameIn, char **filenameOut, int *x, int *y, int *size, int *iterations, int *kernelSize, int *interactive)
+bool parseArgs(int argc,
+               char **argv,
+               char **filenameIn,
+               char **filenameOut,
+               int *x,
+               int *y,
+               int *size,
+               int *iterations,
+               int *kernelSize,
+               double *radius,
+               int *interactive)
 {
 
   int c;
-  while ((c = getopt(argc, argv, "x:y:s:n:k:i:o:")) != -1)
+  while ((c = getopt(argc, argv, "x:y:s:n:k:i:o:r:")) != -1)
     switch (c)
     {
       case 'x':
@@ -58,7 +71,7 @@ bool parseArgs(int argc, char **argv, char **filenameIn, char **filenameOut, int
         }
         break;
       case 'k':
-        /* Size of kernel; 3 or 5 */
+        /* Size of kernel */
         *kernelSize = atoi(optarg);
         if (*kernelSize % 2 != 1)
         {
@@ -66,8 +79,13 @@ bool parseArgs(int argc, char **argv, char **filenameIn, char **filenameOut, int
           return false;
         }
         break;
+      case 'r':
+        /* Radius of effect */
+        *radius = atof(optarg) / 2;
+        break;
       case 'o':
         *filenameOut = optarg;
+
         break;
       default:
         return false;
@@ -79,7 +97,54 @@ bool parseArgs(int argc, char **argv, char **filenameIn, char **filenameOut, int
     return false;
   }
 
-  *filenameIn = argv[optind];
+  *filenameIn = realpath(argv[optind], NULL);
+
+  if (*filenameIn == NULL)
+  {
+    bool hasAccess = access(argv[optind], F_OK) == 0;
+    bool canRead = access(argv[optind], R_OK) == 0;
+
+    if (!hasAccess)
+    {
+      printf("The file \"%s\" does not exist.\n", argv[optind]);
+      return false;
+    }
+
+    else if (!canRead)
+    {
+      printf("The file \"%s\" cannot be read.\n", argv[optind]);
+      return false;
+    }
+    else
+    {
+      printf("The file \"%s\" could not be opened.\n", argv[optind]);
+      return false;
+    }
+  }
+
+  /* Generate a filename */
+  char *filenameOutDyn;
+  if (*filenameOut == NULL)
+  {
+      /* No path given, append suffix to input */
+      const char *base = basename(*filenameIn);
+      const char *suffix = "_out.png";
+      filenameOutDyn = (char *) calloc(strlen(base)
+                           + sizeof(suffix)
+                           + 1, sizeof(char));
+      strncpy(filenameOutDyn, base, strlen(base));
+      const char *dot = strrchr(filenameOutDyn, '.');
+      filenameOutDyn[strlen(filenameOutDyn) - strlen(dot)] = '\0';
+      strcat(filenameOutDyn, suffix);
+  }
+  else
+  {
+      /* Path given, copy value into new array (so we can free it) */
+      filenameOutDyn = (char *) calloc(strlen(*filenameOut) + 1, sizeof(char));
+      strncpy(filenameOutDyn, *filenameOut, strlen(*filenameOut));
+  }
+
+  *filenameOut = filenameOutDyn;
 
   if (strcasecmp(strrchr(*filenameIn, '.'), ".png") != 0)
   {

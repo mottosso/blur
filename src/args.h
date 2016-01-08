@@ -11,4 +11,5 @@ bool parseArgs(int argc,
                int *size,
                int *iterations,
                int *kernelSize,
+               double *radius,
                int *interactive);
