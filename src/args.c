@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
 
 #include "args.h"
@@ -59,9 +60,9 @@ bool parseArgs(int argc, char **argv, char **filenameIn, char **filenameOut, int
       case 'k':
         /* Size of kernel; 3 or 5 */
         *kernelSize = atoi(optarg);
-        if (*kernelSize != 3 && *kernelSize != 5)
+        if (*kernelSize % 2 != 1)
         {
-          printf("Kernel size (%i) must be either 3 or 5.\n", *kernelSize);
+          printf("Kernel size (%i) must be odd-numbered.\n", *kernelSize);
           return false;
         }
         break;
@@ -79,6 +80,12 @@ bool parseArgs(int argc, char **argv, char **filenameIn, char **filenameOut, int
   }
 
   *filenameIn = argv[optind];
+
+  if (strcasecmp(strrchr(*filenameIn, '.'), ".png") != 0)
+  {
+      printf("Input must be PNG.\n");
+      return false;
+  }
 
   return true;
 }

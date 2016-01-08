@@ -53,6 +53,12 @@ Implementing - and illustrating the behaviour of - gaussian blur.
 
 Along the way, it turns out that gaussian is achieved via an algorithm known as "convolution" which applies to fields beyond image processing, such as audio and physics. Many seemingly different image effects can be achieved with convolution alone by use of different "kernels". A kernel is a 2-dimensional array values between 0-1 and a sum of 1, used to derive an average value for each pixel in an image.
 
+### m
+
+- Handling pixels as a linear array
+- Handling color, and transparency (i.e. "components")
+- Interpolating between linear arrays
+
 **References**
 
 - [Convolution theory 1](http://setosa.io/ev/image-kernels)
