@@ -14,7 +14,7 @@ To compile this project, you will need.
 - make
 - clang 3.1+, gcc 4.8+ or msvc 2015+
 
-For the graphical user interface, you will also need.
+For the optional graphical user interface, you will also need.
 
 - Python 2.6-3.2
 - PyQt5
