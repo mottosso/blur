@@ -18,7 +18,7 @@ if (CMAKE_C_COMPILER_ID MATCHES "Clang" OR CMAKE_C_COMPILER_ID MATCHES "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -Wextra -Werror")
 else ()
   MESSAGE (WARNING "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
-  MESSAGE (WARNING "If you are getting errors, try compiling with clang-3.1 or gnu-2.8.")
+  MESSAGE (WARNING "If you are getting errors, try compiling with clang-3.1 or gnu-4.8.4")
 endif ()
 
 add_executable(blur ${SOURCES})
