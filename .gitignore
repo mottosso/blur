@@ -1,3 +1,4 @@
 build
 src/test.c
 __pycache__
+*.pyc
