@@ -31,7 +31,7 @@ $ make
 $ # Command-line interface
 $ ./blur -o out.png in.png
 $ # Graphical user interface
-$ python3 -m blur ./blur ../res/default.png
+$ PYTHONPATH=${pwd}../src/python python3 -m blur ./blur ../res/default.png
 ```
 
 - [See detailed installation instructions](../../wiki/Building-on-Ubuntu-14.04)
