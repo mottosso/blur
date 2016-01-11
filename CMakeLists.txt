@@ -7,11 +7,11 @@ set (BLUR_VERSION_MINOR 1)
 set (BLUR_VERSION_PATCH 0)
 
 include_directories(
-    "src"
+    "src/c"
     "ext"
 )
 
-file(GLOB SOURCES "src/*.c")
+file(GLOB SOURCES "src/c/*.c")
 
 add_executable(blur ${SOURCES})
 

@@ -31,6 +31,8 @@ $ make
 $ ./blur -o outputimage.png inputimage.png
 ```
 
+- [See detailed installation instructions](../wiki/Building-on-Ubuntu-14.04)
+
 <br>
 <br>
 <br>

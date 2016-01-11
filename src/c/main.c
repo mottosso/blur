@@ -15,12 +15,18 @@
 #include "stb/stb_image_write.h"
 
 #include "blur.h"
-#include "args.h"
+#include "cli.h"
 #include "helpers.h"
 
 
 int main(int argc, char **argv)
 {
+    // Track time
+    struct rusage before, after;
+    struct rusage totalBefore, totalAfter;
+    double time_convolve = 0.0, time_total = 0.0;
+    getrusage(RUSAGE_SELF, &totalBefore);
+
     /* Command-line argument default values */
     char *filenameIn = NULL;
     char *filenameOut = NULL;
@@ -77,11 +83,7 @@ int main(int argc, char **argv)
                   radius  // sigma
     );
 
-    printf("Original kernel sum: %.2f\n", computeSum(kernel, kernelSize, kernelSize));
     normalise(kernel, sum, kernelSize, kernelSize);
-
-    struct rusage before, after;
-    double time_convolve = 0.0;
 
     getrusage(RUSAGE_SELF, &before); // Debugging
     convolve(width,
@@ -109,7 +111,7 @@ int main(int argc, char **argv)
         printf("Wrote: %s (%ix%ix%i) " \
                          "(x=%i, y=%i, size=%i) " \
                          "to %s " \
-                         "in %.3fs\n",
+                         "in %.3fs",
             filenameIn, height, width, x, y, size, comp,
             filenameOut, time_convolve);
     }
@@ -118,6 +120,10 @@ int main(int argc, char **argv)
     free(pixelsOut);
     free(filenameIn);
     free(filenameOut);
+
+    getrusage(RUSAGE_SELF, &totalAfter);
+    time_total = calculate(&totalBefore, &totalAfter);
+    printf(" (%.3fs total)\n", time_total);
 
     return 0;
 }

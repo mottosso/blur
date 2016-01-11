@@ -10,7 +10,7 @@
 #include <libgen.h>
 #include <stdio.h>
 
-#include "args.h"
+#include "cli.h"
 
 
 bool parseArgs(int argc,
