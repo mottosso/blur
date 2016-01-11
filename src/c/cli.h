@@ -9,7 +9,5 @@ bool parseArgs(int argc,
                int *x,
                int *y,
                int *size,
-               int *iterations,
                int *kernelSize,
-               double *radius,
-               int *interactive);
+               double *radius);

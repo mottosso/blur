@@ -20,14 +20,12 @@ bool parseArgs(int argc,
                int *x,
                int *y,
                int *size,
-               int *iterations,
                int *kernelSize,
-               double *radius,
-               int *interactive)
+               double *radius)
 {
 
   int c;
-  while ((c = getopt(argc, argv, "x:y:s:n:k:i:o:r:")) != -1)
+  while ((c = getopt(argc, argv, "x:y:s:k:o:r:")) != -1)
     switch (c)
     {
       case 'x':
@@ -54,19 +52,6 @@ bool parseArgs(int argc,
         if (*size < 1)
         {
           printf("Size must be positive.\n");
-          return false;
-        }
-        break;
-      case 'i':
-        /* Interactive mode */
-        *interactive = true;
-        break;
-      case 'n':
-        /* Number of iterations; defaults to 1 */
-        *iterations = atoi(optarg);
-        if (*iterations < 1)
-        {
-          printf("Number of iterations must be positive.\n");
           return false;
         }
         break;

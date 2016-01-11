@@ -33,14 +33,11 @@ int main(int argc, char **argv)
     double radius = 1;
     int x = 0,
         y = 0,
-        size = 10,
-        iterations = 1,
-        kernelSize = 5,
-        interactive = false;
+        size = 80,
+        kernelSize = 5;
 
     if (!parseArgs(argc, argv, &filenameIn, &filenameOut,
-                   &x, &y, &size, &iterations, &kernelSize,
-                   &radius, &interactive))
+                   &x, &y, &size, &kernelSize, &radius))
     {
         return 1;
     }
