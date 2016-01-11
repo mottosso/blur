@@ -108,10 +108,9 @@ class Window(QtWidgets.QDialog):
                                self.kernelSize,
                                self.radius,
                                self.image):
-                sys.stderr.write(line)
+                self.buffer.append(line)
 
-        except Exception as e:
-            print(e)
+        except:
             sys.stderr.write("ERROR: An exception occurred in blur "
                              "executable\n")
             if self.buffer:
