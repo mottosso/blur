@@ -1,8 +1,12 @@
+import os
 import sys
 import time
+import tempfile
 import subprocess
 
 from PyQt5 import QtWidgets, QtGui, QtCore
+
+OUTPUT = os.path.join(tempfile.gettempdir(), "out.png")
 
 
 class Window(QtWidgets.QDialog):
@@ -34,6 +38,8 @@ class Window(QtWidgets.QDialog):
         self.timer = timer
 
         # Run-time properties
+        self.kernelSize = 9
+        self.radius = 2
         self.pos = [0, 0]
         self.size = 80
 
@@ -41,6 +47,7 @@ class Window(QtWidgets.QDialog):
         self.startPos = None
         self.pressed = False
         self.isRunning = False
+        self.buffer = []
 
         self.setStyleSheet("""
             QDialog { background: #fff; }
@@ -94,32 +101,45 @@ class Window(QtWidgets.QDialog):
         self.isRunning = True
         startTime = time.time()
 
-        with subprocess.Popen([self.executable,
-                               "-x", str(self.pos[0]),
-                               "-y", str(self.pos[1]),
-                               "-s", str(self.size),
-                               "-r", "9",
-                               "-k", "5",
-                               "-o", "out.png",
-                               self.image],
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT,
-                              bufsize=1,
-                              universal_newlines=True) as popen:
-            for line in popen.stdout:
-                sys.stdout.write(line)
+        try:
+            with subprocess.Popen([self.executable,
+                                   "-x", str(self.pos[0]),
+                                   "-y", str(self.pos[1]),
+                                   "-s", str(self.size),
+                                   "-k", str(self.kernelSize),
+                                   "-r", str(self.radius),
+                                   "-o", OUTPUT,
+                                   self.image],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.STDOUT,
+                                  bufsize=1,
+                                  universal_newlines=True) as popen:
+                for line in popen.stdout:
+                    self.buffer.append(line)
+
+        except Exception as e:
+            print("An exception occurred in blur executable: %s" % e)
+            print("Last lines of output..")
+            for line in self.buffer:
+                sys.stderr.write(line)
+            self.close()
 
         # Wait for process to finish.
         popen.wait()
 
-        pixmap = QtGui.QPixmap("out.png")
+        pixmap = QtGui.QPixmap(OUTPUT)
         self.label.setPixmap(pixmap)
 
         self.isRunning = False
         self.fps.setText("%.1f fps" % (1 / (time.time() - startTime)))
 
+    def closeEvent(self, event):
+        print("Cleaning up..")
+        os.remove(OUTPUT)
+        print("Shutting down..")
 
-def show(executable, image):
+
+def show(executable, image, kernel=9, radius=4):
     """Launch the Qt application and who the GUI
 
     This is normally run via __main__.py
@@ -129,7 +149,10 @@ def show(executable, image):
 
     """
 
+    print("Launching GUI..")
     app = QtWidgets.QApplication(sys.argv)
     window = Window(executable, image)
+    window.kernelSize = kernel
+    window.radius = radius
     window.show()
     app.exec_()
