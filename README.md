@@ -1,6 +1,6 @@
 ![](https://cloud.githubusercontent.com/assets/2152766/12165616/4272f0b0-b517-11e5-96bf-dcceab4560ce.gif)
 
-This is my finals project for the [CS50x course "Introduction to Computer Science" on the Edx platform](https://courses.edx.org/courses/HarvardX/CS50x3/2015/info), started on December 10th 2015.
+This is my final project for the [CS50x course "Introduction to Computer Science" on the Edx platform](https://courses.edx.org/courses/HarvardX/CS50x3/2015/info), started on December 10th 2015.
 
 <br>
 <br>
