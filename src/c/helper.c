@@ -1,20 +1,17 @@
 #include <stdio.h>
-#include <sys/resource.h>  // rusage
+#include <ctype.h>
 
 #include "helpers.h"
 
-double calculate(const struct rusage* b, const struct rusage* a)
+/* We can't use strings.h, due to compatibility with MSVC */
+int strcasecmp(const char* s1, const char* s2)
 {
-    if (b == NULL || a == NULL)
-    {
-        return 0.0;
-    }
-    else
-    {
-        return ((((a->ru_utime.tv_sec * 1000000 + a->ru_utime.tv_usec) -
-                 (b->ru_utime.tv_sec * 1000000 + b->ru_utime.tv_usec)) +
-                ((a->ru_stime.tv_sec * 1000000 + a->ru_stime.tv_usec) -
-                 (b->ru_stime.tv_sec * 1000000 + b->ru_stime.tv_usec)))
-                / 1000000.0);
+    for (;;) {
+        int c1 = tolower( *((unsigned char*) s1++));
+        int c2 = tolower( *((unsigned char*) s2++));
+
+        if ((c1 != c2) || (c1 == '\0')) {
+            return( c1 - c2);
+        }
     }
 }

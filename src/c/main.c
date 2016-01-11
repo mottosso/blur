@@ -3,10 +3,8 @@
 
 #include <ctype.h>
 #include <string.h>
-#include <strings.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <sys/resource.h>  // rusage
 #include <unistd.h> // F_OK
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -21,12 +19,6 @@
 
 int main(int argc, char **argv)
 {
-    // Track time
-    struct rusage before, after;
-    struct rusage totalBefore, totalAfter;
-    double time_convolve = 0.0, time_total = 0.0;
-    getrusage(RUSAGE_SELF, &totalBefore);
-
     /* Command-line argument default values */
     char *filenameIn = NULL;
     char *filenameOut = NULL;
@@ -82,7 +74,6 @@ int main(int argc, char **argv)
 
     normalise(kernel, sum, kernelSize, kernelSize);
 
-    getrusage(RUSAGE_SELF, &before); // Debugging
     convolve(width,
              height,
              x,          // Define box
@@ -95,8 +86,6 @@ int main(int argc, char **argv)
              kernel,     // kernel
              kernelSize  // kernelSize
     );
-    getrusage(RUSAGE_SELF, &after);  // Debugging
-    time_convolve = calculate(&before, &after);
 
     if (stbi_write_png(filenameOut, width,
                        height, comp, pixelsOut, 0) == 0)
@@ -107,20 +96,15 @@ int main(int argc, char **argv)
     {
         printf("Wrote: %s (%ix%ix%i) " \
                          "(x=%i, y=%i, size=%i) " \
-                         "to %s " \
-                         "in %.3fs",
+                         "to %s\n",
             filenameIn, height, width, x, y, size, comp,
-            filenameOut, time_convolve);
+            filenameOut);
     }
 
     free(pixelsIn);
     free(pixelsOut);
     free(filenameIn);
     free(filenameOut);
-
-    getrusage(RUSAGE_SELF, &totalAfter);
-    time_total = calculate(&totalBefore, &totalAfter);
-    printf(" (%.3fs total)\n", time_total);
 
     return 0;
 }

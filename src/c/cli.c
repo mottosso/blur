@@ -5,12 +5,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <strings.h>
 #include <string.h>
-#include <libgen.h>
 #include <stdio.h>
 
 #include "cli.h"
+#include "helpers.h"
 
 
 bool parseArgs(int argc,
@@ -82,7 +81,7 @@ bool parseArgs(int argc,
     return false;
   }
 
-  *filenameIn = realpath(argv[optind], NULL);
+  *filenameIn = argv[optind];
 
   if (*filenameIn == NULL)
   {
@@ -100,47 +99,43 @@ bool parseArgs(int argc,
       printf("The file \"%s\" cannot be read.\n", argv[optind]);
       return false;
     }
-    else
-    {
-      printf("The file \"%s\" could not be opened.\n", argv[optind]);
-      return false;
-    }
+    
+    printf("The file \"%s\" could not be opened.\n", argv[optind]);
+    return false;
   }
+
+  char *filenameInDyn = (char *) calloc(strlen(argv[optind]) + 1, sizeof(char));
+  strncpy(filenameInDyn, argv[optind], strlen(argv[optind]) + 1);
+  *filenameIn = filenameInDyn;
 
   /* Generate a filename */
   char *filenameOutDyn;
   if (*filenameOut == NULL)
   {
       /* No path given, append suffix to input */
-      const char *base = basename(*filenameIn);
-      const char *suffix = "_out.png";
-      filenameOutDyn = (char *) calloc(strlen(base)
-                           + sizeof(suffix)
-                           + 1, sizeof(char));
-      strncpy(filenameOutDyn, base, strlen(base));
-      const char *dot = strrchr(filenameOutDyn, '.');
-      filenameOutDyn[strlen(filenameOutDyn) - strlen(dot)] = '\0';
-      strcat(filenameOutDyn, suffix);
+      filenameOutDyn = (char *) calloc(8, sizeof(char));
+      strncpy(filenameOutDyn, "out.png", 8);
   }
   else
   {
       /* Path given, copy value into new array (so we can free it) */
       filenameOutDyn = (char *) calloc(strlen(*filenameOut) + 1, sizeof(char));
-      strncpy(filenameOutDyn, *filenameOut, strlen(*filenameOut));
+      strncpy(filenameOutDyn, *filenameOut, strlen(*filenameOut) + 1);
   }
 
   *filenameOut = filenameOutDyn;
 
-  if (strcasecmp(strrchr(*filenameIn, '.'), ".png") != 0)
+  if (strcmp(strrchr(*filenameIn, '.'), ".png") != 0)
   {
-      printf("Input must be PNG.\n");
+      printf("Input must be end with .png\n");
+      printf("Got \"%s\"\n", *filenameIn);
       return false;
   }
 
   return true;
 }
 
-int getLine (char *prmpt, char *buff, size_t sz) {
+int getLine (char *prmpt, char *buff, int sz) {
     int ch, extra;
 
     // Get line with buffer overrun protection.

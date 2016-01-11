@@ -8,6 +8,9 @@
 
 #include "blur.h"
 
+#define M_PI 3.14159265358979323846
+
+
 bool convolve(const int width,  
               const int height,
               const int minX,
@@ -109,7 +112,7 @@ bool convolve(const int width,
                 + (col - margin) * width * components
                 + (row - margin) * components;
 
-              sum += kernelInterpolated[i] * samplePixel[component];
+              sum += (int) (kernelInterpolated[i] * samplePixel[component]);
 
               i++;
             }
@@ -131,7 +134,7 @@ bool convolve(const int width,
   return true;
 }
 
-double computeGaussian(double x, double y, double sigma, double mean)
+double computeGaussian(const double x, const double y, const double sigma, const double mean)
 {
     return exp(-0.5 * (pow((x - mean) / sigma, 2.0)
                      + pow((y - mean) / sigma, 2.0)))
@@ -196,7 +199,7 @@ int computeIdentityKernel(double *out, const int W)
 {
   assert(W % 2 == 1);
 
-  int center = W * 0.5;
+  int center = (int) (W * 0.5);
   for (int x = 0, i = 0; x < W; ++x)
     for (int y = 0; y < W; ++y) {
         out[i] = x == center && y == center ? 1 : 0;
