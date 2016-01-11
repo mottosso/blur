@@ -32,7 +32,7 @@ class Window(QtWidgets.QDialog):
         timer.timeout.connect(self.updatePixmap)
 
         self.image = image
-        self.executable = executable
+        self.executable = os.path.abspath(executable)
         self.fps = fps
         self.label = label
         self.timer = timer
@@ -102,30 +102,30 @@ class Window(QtWidgets.QDialog):
         startTime = time.time()
 
         try:
-            with subprocess.Popen([self.executable,
-                                   "-x", str(self.pos[0]),
-                                   "-y", str(self.pos[1]),
-                                   "-s", str(self.size),
-                                   "-k", str(self.kernelSize),
-                                   "-r", str(self.radius),
-                                   "-o", OUTPUT,
-                                   self.image],
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.STDOUT,
-                                  bufsize=1,
-                                  universal_newlines=True) as popen:
-                for line in popen.stdout:
-                    self.buffer.append(line)
+            for line in launch(self.executable,
+                               self.pos,
+                               self.size,
+                               self.kernelSize,
+                               self.radius,
+                               self.image):
+                sys.stderr.write(line)
 
         except Exception as e:
-            print("An exception occurred in blur executable: %s" % e)
-            print("Last lines of output..")
-            for line in self.buffer:
-                sys.stderr.write(line)
-            self.close()
+            print(e)
+            sys.stderr.write("ERROR: An exception occurred in blur "
+                             "executable\n")
+            if self.buffer:
+                sys.stderr.write("ERROR: Last lines of output..\n")
+                for line in self.buffer:
+                    sys.stderr.write(line)
+            elif not os.path.exists(self.executable):
+                sys.stderr.write("Possibly because executable was "
+                                 "not found at %s" % self.executable)
+            else:
+                sys.stderr.write("ERROR: ..And it didn't produce "
+                                 "any output.\n")
 
-        # Wait for process to finish.
-        popen.wait()
+            self.close()
 
         pixmap = QtGui.QPixmap(OUTPUT)
         self.label.setPixmap(pixmap)
@@ -134,9 +134,59 @@ class Window(QtWidgets.QDialog):
         self.fps.setText("%.1f fps" % (1 / (time.time() - startTime)))
 
     def closeEvent(self, event):
-        print("Cleaning up..")
-        os.remove(OUTPUT)
+        try:
+            os.remove(OUTPUT)
+            print("Cleaning up..")
+        except OSError:
+            # File hasn't yet been written, that's ok.
+            pass
+
         print("Shutting down..")
+
+
+def _launchpy3(executable, pos, size, kernelSize, radius, image):
+    with subprocess.Popen([executable,
+                           "-x", str(pos[0]),
+                           "-y", str(pos[1]),
+                           "-s", str(size),
+                           "-k", str(kernelSize),
+                           "-r", str(radius),
+                           "-o", OUTPUT,
+                           image],
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT,
+                          bufsize=1,
+                          universal_newlines=True) as popen:
+        for line in popen.stdout:
+            yield line
+
+
+def _launchpy2(executable, pos, size, kernelSize, radius, image):
+    popen = subprocess.Popen([executable,
+                              "-x", str(pos[0]),
+                              "-y", str(pos[1]),
+                              "-s", str(size),
+                              "-k", str(kernelSize),
+                              "-r", str(radius),
+                              "-o", OUTPUT,
+                              image],
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
+                             bufsize=1,
+                             universal_newlines=True)
+
+    for line in iter(popen.stdout.readline, b""):
+        yield line
+
+    # Wait until finished
+    popen.communicate()
+
+
+# Python 2 and 3 compatibility
+if sys.version_info[0] > 2:
+    launch = _launchpy3
+else:
+    launch = _launchpy2
 
 
 def show(executable, image, kernel=9, radius=4):

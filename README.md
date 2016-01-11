@@ -10,13 +10,13 @@ This is my finals project for the [CS50x course "Introduction to Computer Scienc
 
 To compile this project, you will need.
 
-- clang
 - cmake
 - make
+- clang 3.1+, gcc 4.8+ or msvc 2015+
 
 For the graphical user interface, you will also need.
 
-- Python 3
+- Python 2.6-3.2
 - PyQt5
 
 **Compilation**
