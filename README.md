@@ -28,7 +28,7 @@ $ mkdir build
 $ cd build
 $ cmake ..
 $ make
-$ ./blur -o outputimage.png inputimage.png
+$ ./blur -o out.png in.png
 ```
 
 - [See detailed installation instructions](../wiki/Building-on-Ubuntu-14.04)
